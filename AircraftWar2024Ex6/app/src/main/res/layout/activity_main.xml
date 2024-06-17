@@ -20,7 +20,7 @@
         />
 
     <Button
-        android:id="@+id/btn"
+        android:id="@+id/offlinegame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:backgroundTint="#B33AA7"
@@ -29,14 +29,28 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.428" />
+
+    <Button
+        android:id="@+id/onlinegame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#B33AA7"
+        android:text="联机游戏"
+        android:textSize="25dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/offlinegame"
+        app:layout_constraintVertical_bias="0.027" />
 
     <RadioGroup
         android:id="@+id/radioGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/btn"
-        app:layout_constraintLeft_toLeftOf="@id/btn"
+        app:layout_constraintTop_toBottomOf="@id/onlinegame"
+        app:layout_constraintLeft_toLeftOf="@id/onlinegame"
         android:layout_marginLeft="5dp"
         android:orientation="vertical">
 

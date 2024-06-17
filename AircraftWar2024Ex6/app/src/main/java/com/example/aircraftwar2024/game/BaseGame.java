@@ -48,6 +48,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author hitsz
  */
 public abstract class BaseGame extends SurfaceView implements SurfaceHolder.Callback, Runnable{
+    private static boolean isOnline = true;
     protected Handler mHandler;
     protected MySoundPool mySoundPool;
     protected MyMediaPlayer myMediaPlayer;
@@ -448,18 +449,29 @@ public abstract class BaseGame extends SurfaceView implements SurfaceHolder.Call
             mySoundPool.play(MySoundPool.game_over);
             myMediaPlayer.stopBgMusic();
             myMediaPlayer.stopBossMusic();
-
             //增加数据并修改文件
             gameDAOimpl.getAllItem();
             Item item = new Item("test",score,new Date());
             gameDAOimpl.doAddandsort(item);
 
             Log.i(TAG, "heroAircraft is not Valid");
-            Message msg = Message.obtain();
-            msg.what = 1; //消息的标识
-            msg.obj = "A"; // 消息的存放
-            // b. 通过Handler发送消息到其绑定的消息队列
-            mHandler.sendMessage(msg);
+            if(isOnline){
+                //TODO:这里的True用Enemy_isdead代替
+                while(true){
+                    Message msg = Message.obtain();
+                    msg.what = 3; //消息的标识
+                    msg.obj = "A"; // 消息的存放
+                    // b. 通过Handler发送消息到其绑定的消息队列
+                    mHandler.sendMessage(msg);
+                    break;
+                }
+            }else{
+                Message msg = Message.obtain();
+                msg.what = 1; //消息的标识
+                msg.obj = "A"; // 消息的存放
+                // b. 通过Handler发送消息到其绑定的消息队列
+                mHandler.sendMessage(msg);
+            }
         }
     }
 
@@ -521,6 +533,9 @@ public abstract class BaseGame extends SurfaceView implements SurfaceHolder.Call
         paint.setColor(Color.RED);
         paint.setTextSize(50);
         canvas.drawText("SCORE:" + this.score, x, y,paint);
+        if(isOnline){
+            canvas.drawText("ENEMY SCORE:" + this.score, x+300, y,paint);
+        }
         y = y + 60;
         canvas.drawText("LIFE:" + this.heroAircraft.getHp(), x, y,paint);
     }
@@ -549,5 +564,9 @@ public abstract class BaseGame extends SurfaceView implements SurfaceHolder.Call
             draw();
             action();
         }
+    }
+
+    public static void setisOnline(boolean set){
+        isOnline = set;
     }
 }

@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -24,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 public class RecordActivity extends AppCompatActivity {
+
+    private Handler mHandler = MainActivity.getInstance().getHandler();
     public static int gameType;
 
     private GameDAOimpl gameDAOimpl;
@@ -97,8 +101,13 @@ public class RecordActivity extends AppCompatActivity {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(RecordActivity.this,MainActivity.class);
-                startActivity(intent);
+//                Intent intent = new Intent(RecordActivity.this,MainActivity.class);
+//                startActivity(intent);
+                Message msg = Message.obtain();
+                msg.what = 2; //消息的标识
+                msg.obj = "A"; // 消息的存放
+                // b. 通过Handler发送消息到其绑定的消息队列
+                mHandler.sendMessage(msg);
             }
         });
     }
