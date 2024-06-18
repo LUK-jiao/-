@@ -8,24 +8,26 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="449dp"
-        android:layout_height="1336dp"
+        android:layout_width="418dp"
+        android:layout_height="743dp"
+        android:scaleType="fitXY"
         app:layout_constraintBottom_toBottomOf="@+id/btn"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:scaleType="fitXY"
-        app:srcCompat="@drawable/endbg" />
+        app:layout_constraintVertical_bias="0.095"
+        app:srcCompat="@drawable/down" />
 
     <TextView
         android:id="@+id/over"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
-        android:text="游戏结束"
-        android:textSize="45sp"
+        android:text="你坠机了，Mamba Out！"
+        android:textColor="#C8E32F"
+        android:textSize="35sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"></TextView>
 
@@ -35,9 +37,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
         android:text="你的分数 ："
-        android:textSize="25sp"
+        android:textSize="30sp"
+        android:textColor="#C8E32F"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.501"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/over"></TextView>
 
@@ -47,7 +49,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
         android:text="对手分数 ："
-        android:textSize="25sp"
+        android:textSize="30sp"
+        android:textColor="#C8E32F"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.501"
         app:layout_constraintStart_toStartOf="parent"

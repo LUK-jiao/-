@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
                                 // 捕获连接异常并继续尝试连接
                                 Log.e(TAG, "连接失败，重试中...");
                                 try {
-                                    Thread.sleep(2000); // 休眠2秒后重试
+                                    Thread.sleep(200); // 休眠0.2秒后重试
                                 } catch (InterruptedException ie) {
                                     Thread.currentThread().interrupt();
                                 }
