@@ -19,6 +19,7 @@ import com.example.aircraftwar2024.Data.GameDAOimpl;
 import com.example.aircraftwar2024.Data.Item;
 import com.example.aircraftwar2024.ImageManager;
 import com.example.aircraftwar2024.activity.GameActivity;
+import com.example.aircraftwar2024.activity.OnlineEndActivity;
 import com.example.aircraftwar2024.aircraft.AbstractAircraft;
 import com.example.aircraftwar2024.aircraft.AbstractEnemyAircraft;
 import com.example.aircraftwar2024.aircraft.BossEnemy;
@@ -115,7 +116,14 @@ public abstract class BaseGame extends SurfaceView implements SurfaceHolder.Call
     protected int enemyMaxNumber = 5;
 
     private boolean gameOverFlag = false;
-    private int score = 0;
+    private static int score = 0;
+
+    private static int e_score = 0;
+
+    public static void setE_score(int score){
+        BaseGame.e_score = score;
+    }
+
 
 
     /**
@@ -257,7 +265,7 @@ public abstract class BaseGame extends SurfaceView implements SurfaceHolder.Call
         }
         return res;
     }
-    public int getScore() {
+    public static int getScore() {
         return score;
     }
     private boolean existBoss() {
@@ -449,6 +457,7 @@ public abstract class BaseGame extends SurfaceView implements SurfaceHolder.Call
             mySoundPool.play(MySoundPool.game_over);
             myMediaPlayer.stopBgMusic();
             myMediaPlayer.stopBossMusic();
+
             //增加数据并修改文件
             gameDAOimpl.getAllItem();
             Item item = new Item("test",score,new Date());
@@ -458,6 +467,8 @@ public abstract class BaseGame extends SurfaceView implements SurfaceHolder.Call
             if(isOnline){
                 //TODO:这里的True用Enemy_isdead代替
                 while(true){
+                    OnlineEndActivity.setScore1(score);
+                    OnlineEndActivity.setScore2(e_score);
                     Message msg = Message.obtain();
                     msg.what = 3; //消息的标识
                     msg.obj = "A"; // 消息的存放
@@ -534,7 +545,7 @@ public abstract class BaseGame extends SurfaceView implements SurfaceHolder.Call
         paint.setTextSize(50);
         canvas.drawText("SCORE:" + this.score, x, y,paint);
         if(isOnline){
-            canvas.drawText("ENEMY SCORE:" + this.score, x+300, y,paint);
+            canvas.drawText("ENEMY SCORE:" + this.e_score, x+300, y,paint);
         }
         y = y + 60;
         canvas.drawText("LIFE:" + this.heroAircraft.getHp(), x, y,paint);

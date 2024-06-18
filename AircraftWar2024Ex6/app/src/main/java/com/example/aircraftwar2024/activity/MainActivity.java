@@ -1,5 +1,6 @@
 package com.example.aircraftwar2024.activity;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 import com.example.aircraftwar2024.R;
 import com.example.aircraftwar2024.game.BaseGame;
 import com.example.aircraftwar2024.music.MyMediaPlayer;
+import com.example.aircraftwar2024.music.MySoundPool;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -62,6 +64,11 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent(MainActivity.this, MainActivity.class);
                     startActivity(intent);
                 }
+                if(msg.what == 3){
+                    //TODO:跳转到联机游戏结算画面
+                    Intent intent = new Intent(MainActivity.this, OnlineEndActivity.class);
+                    startActivity(intent);
+                }
             }
         };
         this.onlinehandler = new Handler(getMainLooper()){
@@ -69,6 +76,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void handleMessage(Message msg){
                //TODO:编写处理事件
+                if(msg.what == 1){
+                    String[] parts = msg.obj.toString().split(",");
+                    int e_score = Integer.parseInt(parts[0]);
+                    BaseGame.setE_score(e_score);
+                }
             }
         };
         super.onCreate(savedInstanceState);
@@ -93,37 +105,71 @@ public class MainActivity extends AppCompatActivity {
         online_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                new Thread(new NetConn(onlinehandler)).start();
-                //更新BaseGame.isOnline的值
-                BaseGame.setisOnline(true);
-                int selectedId = radioGroup.getCheckedRadioButtonId(); // 获取选中的 RadioButton 的 ID
-                RadioButton radioButton = (RadioButton) findViewById(selectedId); // 根据 ID 获取 RadioButton 对象
-                String option = radioButton.getText().toString(); // 获取选中 RadioButton 的文本
-                Intent intent = new Intent(MainActivity.this,OffilineActivity.class);
-                intent.putExtra("Music", option);
-                startActivity(intent);
+                // 创建一个 Handler 用于在主线程上执行操作
+                Handler mainHandler = new Handler(Looper.getMainLooper());
+
+                // 显示“匹配中”对话框
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("匹配中");
+                builder.setMessage("正在连接服务器，请稍候...");
+                builder.setCancelable(false);
+                AlertDialog matchingDialog = builder.create();
+                matchingDialog.show();
+
+                // 启动连接服务器的线程
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        while (true) {
+                            try {
+                                // 尝试连接服务器
+                                new NetConn(onlinehandler).run();
+                                Log.i(TAG, "send message to server");
+                                writer.println("hello,server");
+
+                                // 连接成功，更新 BaseGame.isOnline 的值
+                                BaseGame.setisOnline(true);
+
+                                // 获取选中的 RadioButton 的 ID 和文本
+                                int selectedId = radioGroup.getCheckedRadioButtonId();
+                                RadioButton radioButton = (RadioButton) findViewById(selectedId);
+                                String option = radioButton.getText().toString();
+                                if (option.equals("开启音乐")) {
+                                    MyMediaPlayer.music = true;
+                                    MySoundPool.music = true;
+                                } else {
+                                    MyMediaPlayer.music = false;
+                                    MySoundPool.music = false;
+                                }
+
+                                // 关闭“匹配中”对话框并进入游戏
+                                mainHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        matchingDialog.dismiss();
+                                        Intent intent = new Intent(MainActivity.this, GameActivity.class);
+                                        intent.putExtra("gameType", 3);
+                                        startActivity(intent);
+                                    }
+                                });
+                                break; // 退出循环
+                            } catch (Exception e) {
+                                // 捕获连接异常并继续尝试连接
+                                Log.e(TAG, "连接失败，重试中...");
+                                try {
+                                    Thread.sleep(2000); // 休眠2秒后重试
+                                } catch (InterruptedException ie) {
+                                    Thread.currentThread().interrupt();
+                                }
+                            }
+                        }
+                    }
+                }).start();
             }
         });
-        mHandler = new Handler(Looper.getMainLooper()) {
-            @Override
-            public void handleMessage(Message msg) {
-                // 处理接收到的消息，根据消息执行相应的操作
-                if (msg.what == 1) {
-                    Intent intent = new Intent(MainActivity.this,RecordActivity.class);
-                    startActivity(intent);
-                }
-                if(msg.what == 2){
-                    Intent intent = new Intent(MainActivity.this, MainActivity.class);
-                    startActivity(intent);
-                }
-                if(msg.what == 3){
-                    //TODO:跳转到联机游戏结算画面
-                    Intent intent = new Intent(MainActivity.this, OnlineEndActivity.class);
-                    startActivity(intent);
-                }
-            }
-        };
     }
+
+
 
     public static MainActivity getInstance() {
         return instance;
