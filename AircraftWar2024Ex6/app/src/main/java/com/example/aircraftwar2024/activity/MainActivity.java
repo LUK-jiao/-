@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
                 // 显示“匹配中”对话框
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                 builder.setTitle("匹配中");
-                builder.setMessage("正在连接服务器，请稍候...");
+                builder.setMessage("正在匹配");
                 builder.setCancelable(false);
                 AlertDialog matchingDialog = builder.create();
                 matchingDialog.show();
