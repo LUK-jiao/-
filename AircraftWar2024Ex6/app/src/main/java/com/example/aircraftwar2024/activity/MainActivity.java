@@ -75,12 +75,12 @@ public class MainActivity extends AppCompatActivity {
             //当数据处理子线程更新数据后发送消息给UI线程，UI线程更新UI
             @Override
             public void handleMessage(Message msg){
-               //TODO:编写处理事件
                 if(msg.what == 1){
                     String[] parts = msg.obj.toString().split(",");
                     int e_score = Integer.parseInt(parts[0]);
                     BaseGame.setE_score(e_score);
                 }
+                //TODO:编写处理事件
             }
         };
         super.onCreate(savedInstanceState);
