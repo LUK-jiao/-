@@ -116,7 +116,18 @@ public abstract class BaseGame extends SurfaceView implements SurfaceHolder.Call
     protected int enemyMaxNumber = 5;
 
     private boolean gameOverFlag = false;
+    private static boolean op_gameOverFlag = false;
+    public static void setOp_gameOverFlag(boolean b){
+        op_gameOverFlag = b;
+    }
+
+
+    public boolean isGameOverFlag(){
+        return gameOverFlag;
+    }
     private static int score = 0;
+
+
 
     private static int e_score = 0;
 
@@ -154,6 +165,10 @@ public abstract class BaseGame extends SurfaceView implements SurfaceHolder.Call
 
     public BaseGame(Context context,Handler mHandler){
         super(context);
+        score = 0;
+        e_score = 0;
+        gameOverFlag = false;
+        op_gameOverFlag = false;
         this.mHandler = mHandler;
         mbLoop = true;
         mPaint = new Paint();  //设置画笔
@@ -466,16 +481,15 @@ public abstract class BaseGame extends SurfaceView implements SurfaceHolder.Call
             Log.i(TAG, "heroAircraft is not Valid");
             if(isOnline){
                 //TODO:这里的True用Enemy_isdead代替
-                while(true){
-                    OnlineEndActivity.setScore1(score);
-                    OnlineEndActivity.setScore2(e_score);
-                    Message msg = Message.obtain();
-                    msg.what = 3; //消息的标识
-                    msg.obj = "A"; // 消息的存放
-                    // b. 通过Handler发送消息到其绑定的消息队列
-                    mHandler.sendMessage(msg);
-                    break;
+                while(!(op_gameOverFlag && gameOverFlag)){
                 }
+                OnlineEndActivity.setScore1(score);
+                OnlineEndActivity.setScore2(e_score);
+                Message msg = Message.obtain();
+                msg.what = 3; //消息的标识
+                msg.obj = "A"; // 消息的存放
+                // b. 通过Handler发送消息到其绑定的消息队列
+                mHandler.sendMessage(msg);
             }else{
                 Message msg = Message.obtain();
                 msg.what = 1; //消息的标识

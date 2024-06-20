@@ -39,30 +39,3 @@ public class MyClass {
     }
 }
 
-class ServerSocketThread extends Thread{
-    private BufferedReader in;
-    private PrintWriter pw;
-    private Socket socket;
-    public ServerSocketThread(Socket socket){
-        this.socket = socket;
-    }
-
-    @Override
-    public void run(){
-        try {
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream(),"UTF-8"));
-            pw = new PrintWriter(new BufferedWriter(
-                    new OutputStreamWriter(socket.getOutputStream(), "UTF-8")), true);
-
-            String content;
-
-            while ((content = in.readLine()) != null) {
-                //4.和客户端通信
-
-            }
-        } catch (IOException e) {
-
-            throw new RuntimeException(e);
-        }
-    }
-}

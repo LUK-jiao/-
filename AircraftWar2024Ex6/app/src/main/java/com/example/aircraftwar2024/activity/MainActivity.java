@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import com.example.aircraftwar2024.R;
 import com.example.aircraftwar2024.game.BaseGame;
+import com.example.aircraftwar2024.game.HardGame;
 import com.example.aircraftwar2024.music.MyMediaPlayer;
 import com.example.aircraftwar2024.music.MySoundPool;
 
@@ -52,6 +53,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //设置匹配中对话框
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("匹配中");
+        builder.setMessage("正在匹配");
+        builder.setCancelable(false);
+        AlertDialog matchingDialog = builder.create();
+
         this.mHandler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(Message msg) {
@@ -75,11 +83,39 @@ public class MainActivity extends AppCompatActivity {
             //当数据处理子线程更新数据后发送消息给UI线程，UI线程更新UI
             @Override
             public void handleMessage(Message msg){
-                if(msg.what == 1){
-                    String[] parts = msg.obj.toString().split(",");
-                    int e_score = Integer.parseInt(parts[0]);
+                String[] parts = msg.obj.toString().split(",");
+                //标志游戏匹配成功，开始游戏
+                if(msg.what == 0 && parts[0].equals("match success")){
+                    matchingDialog.dismiss();
+                    HardGame game = new HardGame(MainActivity.this, mHandler);
+                    setContentView(game);
+                    // 如果开启游戏，那么就新开一个线程给服务端发送当前分数
+                    // 如果当前玩家已经死亡，那么就给服务器传"end"信息
+                    new Thread(() -> {
+                        //发送当前分数
+                        while (!game.isGameOverFlag()) {
+
+                            writer.println("score,"+game.getScore());
+                            Log.i(TAG,"send to server: score,"+game.getScore());
+                            try {
+                                Thread.sleep(50);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        //死亡后发送结束标志
+                        writer.println("end");
+                    }).start();
+                }
+                if(msg.what == 0 && parts[0].equals("score")){
+                    int e_score = Integer.parseInt(parts[1]);
                     BaseGame.setE_score(e_score);
                 }
+                if(msg.what == 0 && parts[0].equals("end")){
+                    BaseGame.setOp_gameOverFlag(true);
+                }
+
                 //TODO:编写处理事件
             }
         };
@@ -105,67 +141,91 @@ public class MainActivity extends AppCompatActivity {
         online_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // 创建一个 Handler 用于在主线程上执行操作
-                Handler mainHandler = new Handler(Looper.getMainLooper());
-
-                // 显示“匹配中”对话框
-                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                builder.setTitle("匹配中");
-                builder.setMessage("正在匹配");
-                builder.setCancelable(false);
-                AlertDialog matchingDialog = builder.create();
+                //显示“匹配中”对话框
                 matchingDialog.show();
+                new Thread(new NetConn(onlinehandler)).start();
 
-                // 启动连接服务器的线程
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        while (true) {
-                            try {
-                                // 尝试连接服务器
-                                new NetConn(onlinehandler).run();
-                                Log.i(TAG, "send message to server");
-                                writer.println("hello,server");
+                BaseGame.setisOnline(true);
 
-                                // 连接成功，更新 BaseGame.isOnline 的值
-                                BaseGame.setisOnline(true);
+                // 获取选中的 RadioButton 的 ID 和文本
+                int selectedId = radioGroup.getCheckedRadioButtonId();
+                RadioButton radioButton = (RadioButton) findViewById(selectedId);
+                String option = radioButton.getText().toString();
+                if (option.equals("开启音乐")) {
+                    MyMediaPlayer.music = true;
+                    MySoundPool.music = true;
+                } else {
+                    MyMediaPlayer.music = false;
+                    MySoundPool.music = false;
+                }
 
-                                // 获取选中的 RadioButton 的 ID 和文本
-                                int selectedId = radioGroup.getCheckedRadioButtonId();
-                                RadioButton radioButton = (RadioButton) findViewById(selectedId);
-                                String option = radioButton.getText().toString();
-                                if (option.equals("开启音乐")) {
-                                    MyMediaPlayer.music = true;
-                                    MySoundPool.music = true;
-                                } else {
-                                    MyMediaPlayer.music = false;
-                                    MySoundPool.music = false;
-                                }
-
-                                // 关闭“匹配中”对话框并进入游戏
-                                mainHandler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        matchingDialog.dismiss();
-                                        Intent intent = new Intent(MainActivity.this, GameActivity.class);
-                                        intent.putExtra("gameType", 3);
-                                        startActivity(intent);
-                                    }
-                                });
-                                break; // 退出循环
-                            } catch (Exception e) {
-                                // 捕获连接异常并继续尝试连接
-                                Log.e(TAG, "连接失败，重试中...");
-                                try {
-                                    Thread.sleep(200); // 休眠0.2秒后重试
-                                } catch (InterruptedException ie) {
-                                    Thread.currentThread().interrupt();
-                                }
-                            }
-                        }
-                    }
-                }).start();
             }
+
+//            @Override
+//            public void onClick(View view) {
+//                // 创建一个 Handler 用于在主线程上执行操作
+//                Handler mainHandler = new Handler(Looper.getMainLooper());
+//
+//                // 显示“匹配中”对话框
+//                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+//                builder.setTitle("匹配中");
+//                builder.setMessage("正在匹配");
+//                builder.setCancelable(false);
+//                AlertDialog matchingDialog = builder.create();
+//                matchingDialog.show();
+//
+//
+////                 启动连接服务器的线程
+//                new Thread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        while (true) {
+//                            try {
+//                                // 尝试连接服务器
+//                                new NetConn(onlinehandler).run();
+//                                Log.i(TAG, "send message to server");
+//                                writer.println("hello,server");
+//
+//                                // 连接成功，更新 BaseGame.isOnline 的值
+//                                BaseGame.setisOnline(true);
+//
+//                                // 获取选中的 RadioButton 的 ID 和文本
+//                                int selectedId = radioGroup.getCheckedRadioButtonId();
+//                                RadioButton radioButton = (RadioButton) findViewById(selectedId);
+//                                String option = radioButton.getText().toString();
+//                                if (option.equals("开启音乐")) {
+//                                    MyMediaPlayer.music = true;
+//                                    MySoundPool.music = true;
+//                                } else {
+//                                    MyMediaPlayer.music = false;
+//                                    MySoundPool.music = false;
+//                                }
+//
+//                                // 关闭“匹配中”对话框并进入游戏
+//                                mainHandler.post(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        matchingDialog.dismiss();
+//                                        Intent intent = new Intent(MainActivity.this, GameActivity.class);
+//                                        intent.putExtra("gameType", 3);
+//                                        startActivity(intent);
+//                                    }
+//                                });
+//                                break; // 退出循环
+//                            } catch (Exception e) {
+//                                // 捕获连接异常并继续尝试连接
+//                                Log.e(TAG, "连接失败，重试中...");
+//                                try {
+//                                    Thread.sleep(200); // 休眠0.2秒后重试
+//                                } catch (InterruptedException ie) {
+//                                    Thread.currentThread().interrupt();
+//                                }
+//                            }
+//                        }
+//                    }
+//                }).start();
+//                new Thread(new NetConn(onlinehandler)).start();
+//            }
         });
     }
 
@@ -208,7 +268,7 @@ public class MainActivity extends AppCompatActivity {
                             {
                                 //发送消息给UI线程
                                 Message msg = new Message();
-                                msg.what = 1;
+                                msg.what = 0;
                                 msg.obj = fromserver;
                                 toClientHandler.sendMessage(msg);
                             }
