@@ -468,7 +468,6 @@ public abstract class BaseGame extends SurfaceView implements SurfaceHolder.Call
         flyingSupplies.removeIf(AbstractFlyingObject::notValid);
         if (heroAircraft.notValid()) {
             gameOverFlag = true;
-            mbLoop = false;
             mySoundPool.play(MySoundPool.game_over);
             myMediaPlayer.stopBgMusic();
             myMediaPlayer.stopBossMusic();
@@ -482,7 +481,9 @@ public abstract class BaseGame extends SurfaceView implements SurfaceHolder.Call
             if(isOnline){
                 //TODO:这里的True用Enemy_isdead代替
                 while(!(op_gameOverFlag && gameOverFlag)){
+
                 }
+                mbLoop = false;
                 OnlineEndActivity.setScore1(score);
                 OnlineEndActivity.setScore2(e_score);
                 Message msg = Message.obtain();
