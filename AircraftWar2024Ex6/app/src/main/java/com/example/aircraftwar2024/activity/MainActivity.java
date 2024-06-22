@@ -160,72 +160,6 @@ public class MainActivity extends AppCompatActivity {
                 }
 
             }
-
-//            @Override
-//            public void onClick(View view) {
-//                // 创建一个 Handler 用于在主线程上执行操作
-//                Handler mainHandler = new Handler(Looper.getMainLooper());
-//
-//                // 显示“匹配中”对话框
-//                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-//                builder.setTitle("匹配中");
-//                builder.setMessage("正在匹配");
-//                builder.setCancelable(false);
-//                AlertDialog matchingDialog = builder.create();
-//                matchingDialog.show();
-//
-//
-////                 启动连接服务器的线程
-//                new Thread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        while (true) {
-//                            try {
-//                                // 尝试连接服务器
-//                                new NetConn(onlinehandler).run();
-//                                Log.i(TAG, "send message to server");
-//                                writer.println("hello,server");
-//
-//                                // 连接成功，更新 BaseGame.isOnline 的值
-//                                BaseGame.setisOnline(true);
-//
-//                                // 获取选中的 RadioButton 的 ID 和文本
-//                                int selectedId = radioGroup.getCheckedRadioButtonId();
-//                                RadioButton radioButton = (RadioButton) findViewById(selectedId);
-//                                String option = radioButton.getText().toString();
-//                                if (option.equals("开启音乐")) {
-//                                    MyMediaPlayer.music = true;
-//                                    MySoundPool.music = true;
-//                                } else {
-//                                    MyMediaPlayer.music = false;
-//                                    MySoundPool.music = false;
-//                                }
-//
-//                                // 关闭“匹配中”对话框并进入游戏
-//                                mainHandler.post(new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        matchingDialog.dismiss();
-//                                        Intent intent = new Intent(MainActivity.this, GameActivity.class);
-//                                        intent.putExtra("gameType", 3);
-//                                        startActivity(intent);
-//                                    }
-//                                });
-//                                break; // 退出循环
-//                            } catch (Exception e) {
-//                                // 捕获连接异常并继续尝试连接
-//                                Log.e(TAG, "连接失败，重试中...");
-//                                try {
-//                                    Thread.sleep(200); // 休眠0.2秒后重试
-//                                } catch (InterruptedException ie) {
-//                                    Thread.currentThread().interrupt();
-//                                }
-//                            }
-//                        }
-//                    }
-//                }).start();
-//                new Thread(new NetConn(onlinehandler)).start();
-//            }
         });
     }
 
@@ -239,50 +173,109 @@ public class MainActivity extends AppCompatActivity {
         return mHandler;
     }
 
-    protected class NetConn extends Thread{
-        private BufferedReader in;
-        private Handler toClientHandler;
-        public NetConn(Handler myHandler){
-            this.toClientHandler = myHandler;
-        }
-        @Override
-        public void run(){
-            try{
-                socket = new Socket();
+//    protected class NetConn extends Thread{
+//        private BufferedReader in;
+//        private Handler toClientHandler;
+//        public NetConn(Handler myHandler){
+//            this.toClientHandler = myHandler;
+//        }
+//        @Override
+//        public void run(){
+//            try{
+//                socket = new Socket();
+//
+//                socket.connect(new InetSocketAddress
+//                        ("10.0.2.2",9999),5000);
+//                in = new BufferedReader(new InputStreamReader(socket.getInputStream(),"utf-8"));
+//                writer = new PrintWriter(new BufferedWriter(
+//                        new OutputStreamWriter(
+//                                socket.getOutputStream(),"utf-8")),true);
+//                Log.i(TAG,"connect to server");
+//
+//                //接收服务器返回的数据
+//                Thread receiveServerMsg =  new Thread(){
+//                    @Override
+//                    public void run(){
+//                        String fromserver = null;
+//                        try{
+//                            while((fromserver = in.readLine())!=null)
+//                            {
+//                                //发送消息给UI线程
+//                                Message msg = new Message();
+//                                msg.what = 0;
+//                                msg.obj = fromserver;
+//                                toClientHandler.sendMessage(msg);
+//                            }
+//                        }catch (IOException ex){
+//                            ex.printStackTrace();
+//                        }
+//                    }
+//                };
+//                receiveServerMsg.start();
+//            }catch(UnknownHostException ex){
+//                ex.printStackTrace();
+//            }catch(IOException ex){
+//                ex.printStackTrace();
+//            }
+//        }
+//    }
+protected class NetConn extends Thread {
+    private BufferedReader in;
+    private Handler toClientHandler;
 
-                socket.connect(new InetSocketAddress
-                        ("10.0.2.2",9999),5000);
-                in = new BufferedReader(new InputStreamReader(socket.getInputStream(),"utf-8"));
+    public NetConn(Handler myHandler) {
+        this.toClientHandler = myHandler;
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                socket = new Socket();
+                socket.connect(new InetSocketAddress("10.0.2.2", 9999), 5000);
+                in = new BufferedReader(new InputStreamReader(socket.getInputStream(), "utf-8"));
                 writer = new PrintWriter(new BufferedWriter(
                         new OutputStreamWriter(
-                                socket.getOutputStream(),"utf-8")),true);
-                Log.i(TAG,"connect to server");
+                                socket.getOutputStream(), "utf-8")), true);
+                Log.i(TAG, "connect to server");
 
-                //接收服务器返回的数据
-                Thread receiveServerMsg =  new Thread(){
+                // 接收服务器返回的数据
+                Thread receiveServerMsg = new Thread() {
                     @Override
-                    public void run(){
-                        String fromserver = null;
-                        try{
-                            while((fromserver = in.readLine())!=null)
-                            {
-                                //发送消息给UI线程
+                    public void run() {
+                        String fromServer;
+                        try {
+                            while ((fromServer = in.readLine()) != null) {
+                                // 发送消息给UI线程
                                 Message msg = new Message();
                                 msg.what = 0;
-                                msg.obj = fromserver;
+                                msg.obj = fromServer;
                                 toClientHandler.sendMessage(msg);
                             }
-                        }catch (IOException ex){
+                        } catch (IOException ex) {
                             ex.printStackTrace();
                         }
                     }
                 };
                 receiveServerMsg.start();
-            }catch(UnknownHostException ex){
+
+                // 如果连接成功，退出重试循环
+                break;
+            } catch (UnknownHostException ex) {
                 ex.printStackTrace();
-            }catch(IOException ex){
+                Log.e(TAG, "UnknownHostException, retrying connection...");
+            } catch (IOException ex) {
                 ex.printStackTrace();
+                Log.e(TAG, "IOException, retrying connection...");
+            }
+
+            // 等待一段时间后重试连接
+            try {
+                Thread.sleep(1000); // 1秒后重试
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
+}
 }

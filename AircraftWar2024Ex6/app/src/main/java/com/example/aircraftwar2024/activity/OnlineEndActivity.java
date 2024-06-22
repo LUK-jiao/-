@@ -38,8 +38,6 @@ public class OnlineEndActivity extends AppCompatActivity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Intent intent = new Intent(RecordActivity.this,MainActivity.class);
-//                startActivity(intent);
                 Message msg = Message.obtain();
                 msg.what = 2; //消息的标识
                 msg.obj = "A"; // 消息的存放
